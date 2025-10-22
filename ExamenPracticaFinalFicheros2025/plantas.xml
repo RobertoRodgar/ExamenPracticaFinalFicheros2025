@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plantas>
+<planta>
+<codigo>1</codigo>
+<nombre>captus</nombre>
+<foto>X</foto>
+<descripcion>Ninguna</descripcion>
+</planta>
+<planta>
+<codigo>2</codigo>
+<nombre>Geranio</nombre>
+<foto>X</foto>
+<descripcion>Ninguna</descripcion>
+</planta>
+</plantas>
