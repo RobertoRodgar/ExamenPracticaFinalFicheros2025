@@ -2,6 +2,7 @@ package GestionVivero;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -12,10 +13,12 @@ public class Main {
 	public static void main(String[] args) {
 		
 		crearCarpetas();
-		escribirEmpleado();
+		escribirEmpleados();
+		escribirPlantas();
 		
-		//Crear funcion de crar el archivo plantas y baja
 	}
+	
+	
 	public static void crearCarpetas() {
 		String[] carpetas = {"Plantas","Empleados","Empleados/Baja","Tickets","Devoluciones"};
 		
@@ -27,7 +30,9 @@ public class Main {
 			}
 		}
 	}
-	public static void escribirEmpleado(){
+	
+	
+	public static void escribirEmpleados(){
 		String ruta = "Empleados/empleado.dat";
 		File rutaEmpleado = new File(ruta);
 		if (!rutaEmpleado.exists()) {
@@ -37,12 +42,13 @@ public class Main {
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
-		}else if(rutaEmpleado.exists() && rutaEmpleado.length() < 0) {
+		}else if(rutaEmpleado.exists() && rutaEmpleado.length() <= 0) {
 			anadirEmpleados();
 		}else {
-			System.out.println("El archivo empleados.dat cargado exitosamente");
+			System.out.println("El archivo empleados.dat se ha cargado exitosamente.");
 		}
 	}
+	
 	
 	private static void anadirEmpleados() {
 		try (FileOutputStream FicheroEscritura = new FileOutputStream("Empleados/empleado.dat");
@@ -64,6 +70,67 @@ public class Main {
 			i.printStackTrace();
 		}
 	}
+	
+	
+	private static void escribirPlantas() {
+		String ruta = "Plantas/plantas.xml";
+		File rutaPlanta = new File(ruta);
+		if(!rutaPlanta.exists()) {
+			try {
+				rutaPlanta.createNewFile();
+				anadirPlantas();
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}else if(rutaPlanta.exists() && rutaPlanta.length() <= 0) {
+			anadirPlantas();
+		}else {
+			System.out.println("El archivo plantas.xml se ha cargado exitosamente.");
+		}
+		
+		ruta = "Plantas/plantas.dat";
+		rutaPlanta = new File(ruta);
+		if(!rutaPlanta.exists()) {
+			try {
+				rutaPlanta.createNewFile();
+				//pasarXML_DAT();
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}else if(rutaPlanta.exists() && rutaPlanta.length() <= 0) {
+			//pasarXML_DAT();
+		}else {
+			System.out.println("El archivo plantas.dat se ha cargado exitosamente.");
+		}
+	}
+	
+	
+	private static void anadirPlantas() {
+		File rutaPlantas = new File("Plantas/plantas.xml");
+		try(FileWriter escPlantas = new FileWriter(rutaPlantas)){
+			escPlantas.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			escPlantas.write("<plantas>");
+			escPlantas.write("	<planta>");
+			escPlantas.write("		<codigo>1</codigo>");
+			escPlantas.write("		<nombre>Cactus</nombre>");
+			escPlantas.write("		<foto>cactus.jpg</foto>");
+			escPlantas.write("		<descripcion>Planta suculenta del desierto.</descripcion>");
+			escPlantas.write("	<planta>");
+			escPlantas.write("<plantas>");
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+	private static void pasarXML_DAT() {
+		File rutaPlantasXML = new File("Plantas/plantas.xml");
+		File rutaPlantasDAT = new File("Plantas/plantas.dat");
+		
+	}
+	
+	
 	private static void bajaEmpleados() {
 		String ruta = "Empleados/Baja/empleadosBaja.dat";
 		File rutaEmpleado = new File(ruta);
@@ -78,6 +145,8 @@ public class Main {
 			System.out.println("Archivo empleadosBaja.dat cargado exitosamente en la carpeta Empleados/Baja/");
 		}
 	}
+	
+	
 	private static void bajaPlantas() {
 		String ruta = "Plantas/plantasBaja.dat";
 		File rutaPlanta = new File(ruta);
