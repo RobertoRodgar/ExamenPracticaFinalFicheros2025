@@ -1,11 +1,16 @@
 package GestionVivero;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 public class Main {
@@ -15,6 +20,7 @@ public class Main {
 		crearCarpetas();
 		escribirEmpleados();
 		escribirPlantas();
+		//iniciarSesion();
 		
 	}
 	
@@ -115,8 +121,8 @@ public class Main {
 			escPlantas.write("		<nombre>Cactus</nombre>");
 			escPlantas.write("		<foto>cactus.jpg</foto>");
 			escPlantas.write("		<descripcion>Planta suculenta del desierto.</descripcion>");
-			escPlantas.write("	<planta>");
-			escPlantas.write("<plantas>");
+			escPlantas.write("	</planta>");
+			escPlantas.write("</plantas>");
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
@@ -126,8 +132,55 @@ public class Main {
 	
 	private static void pasarXML_DAT() {
 		File rutaPlantasXML = new File("Plantas/plantas.xml");
-		File rutaPlantasDAT = new File("Plantas/plantas.dat");
+		ArrayList<Planta> listaPlantas = new ArrayList<Planta>();
 		
+		try (FileInputStream fis = new FileInputStream(rutaPlantasXML)) {
+
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(fis);
+
+			doc.getDocumentElement().normalize();
+
+			NodeList nList = doc.getElementsByTagName("planta");
+
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);
+
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+
+					int codigo = Integer.parseInt(eElement.getElementsByTagName("codigo").item(0).getTextContent());
+					String nombre = eElement.getElementsByTagName("nombre").item(0).getTextContent();
+					String foto = eElement.getElementsByTagName("foto").item(0).getTextContent();
+					String descripcion = eElement.getElementsByTagName("descripcion").item(0).getTextContent();
+					float precio = ThreadLocalRandom.current().nextFloat(1, 500);
+					precio = Math.round(precio * 100f) / 100f;
+					int stock = ThreadLocalRandom.current().nextInt(1, 501);
+					
+					Planta planta = new Planta(codigo, nombre, foto, descripcion, precio, stock);
+					listaPlantas.add(planta);
+				}
+			}
+
+			System.out.println("Datos del XML leídos correctamente. " + listaPlantas.size() + " planta(s) cargada(s).");
+
+		} catch (Exception e) {
+			System.out.println("Error al leer el XML plantas.xml ");
+			e.printStackTrace();
+			return;
+		}
+		try (FileOutputStream fos = new FileOutputStream("Plantas/plantas.dat");
+				 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+				
+				oos.writeObject(listaPlantas);
+				
+				System.out.println("Planta escrito correctamente en Plantas/plantas.dat");
+				
+			} catch (IOException e) {
+				System.out.println("Error al escribir en el archivo DAT plantas.dat");
+				e.printStackTrace();
+			}
 	}
 	
 	
