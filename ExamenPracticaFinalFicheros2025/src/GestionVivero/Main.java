@@ -2,6 +2,7 @@ package GestionVivero;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,13 +15,14 @@ import org.w3c.dom.NodeList;
 
 
 public class Main {
-	static ArrayList<Empleado> ListaEmpleados = new ArrayList<>();
+	private static ArrayList<Empleado> ListaEmpleados = new ArrayList<Empleado>();
 	public static void main(String[] args) {
 		
 		crearCarpetas();
 		escribirEmpleados();
+		cargarEmpleados();
 		escribirPlantas();
-		//iniciarSesion();
+		iniciarSesion();
 		
 	}
 	
@@ -45,11 +47,13 @@ public class Main {
 			try {
 				rutaEmpleado.createNewFile();
 				anadirEmpleados();
+				System.out.println("El archivo empleados.dat se ha cargado exitosamente.");
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
 		}else if(rutaEmpleado.exists() && rutaEmpleado.length() <= 0) {
 			anadirEmpleados();
+			System.out.println("El archivo empleados.dat se ha cargado exitosamente.");
 		}else {
 			System.out.println("El archivo empleados.dat se ha cargado exitosamente.");
 		}
@@ -78,18 +82,29 @@ public class Main {
 	}
 	
 	
+	private static void cargarEmpleados() {
+		File rutaEmpleados = new File("Empleados/empleado.dat");
+		try(FileInputStream fis = new FileInputStream(rutaEmpleados)){
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		ListaEmpleados = (ArrayList<Empleado>) ois.readObject();
+		}catch(IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	private static void escribirPlantas() {
 		String ruta = "Plantas/plantas.xml";
 		File rutaPlanta = new File(ruta);
 		if(!rutaPlanta.exists()) {
 			try {
 				rutaPlanta.createNewFile();
-				anadirPlantas();
+				anadirPlantasPredeterminado();
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
 		}else if(rutaPlanta.exists() && rutaPlanta.length() <= 0) {
-			anadirPlantas();
+			anadirPlantasPredeterminado();
 		}else {
 			System.out.println("El archivo plantas.xml se ha cargado exitosamente.");
 		}
@@ -99,19 +114,19 @@ public class Main {
 		if(!rutaPlanta.exists()) {
 			try {
 				rutaPlanta.createNewFile();
-				//pasarXML_DAT();
+				pasarXML_DAT();
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
 		}else if(rutaPlanta.exists() && rutaPlanta.length() <= 0) {
-			//pasarXML_DAT();
+			pasarXML_DAT();
 		}else {
 			System.out.println("El archivo plantas.dat se ha cargado exitosamente.");
 		}
 	}
 	
 	
-	private static void anadirPlantas() {
+	private static void anadirPlantasPredeterminado() {
 		File rutaPlantas = new File("Plantas/plantas.xml");
 		try(FileWriter escPlantas = new FileWriter(rutaPlantas)){
 			escPlantas.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -127,6 +142,34 @@ public class Main {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	
+	private static void darAltaPlantas() {
+		Scanner sc = new Scanner(System.in);
+		int cantidad = sc.nextInt();
+		for (int i = 0; i < cantidad; i++) {
+			int codigo = sc.nextInt();
+			String nombre = sc.nextLine();
+			String foto = sc.nextLine();
+			String desc = sc.nextLine();
+			File rutaPlantas = new File("Plantas/plantas.xml");
+			try (FileWriter escPlantas = new FileWriter(rutaPlantas)) {
+				escPlantas.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+				escPlantas.write("<plantas>");
+				escPlantas.write("	<planta>");
+				escPlantas.write("		<codigo>"+codigo+"</codigo>");
+				escPlantas.write("		<nombre>"+nombre+"</nombre>");
+				escPlantas.write("		<foto>"+foto+"</foto>");
+				escPlantas.write("		<descripcion>"+desc+"</descripcion>");
+				escPlantas.write("	</planta>");
+				escPlantas.write("</plantas>");
+				pasarXML_DAT();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		sc.close();
 	}
 	
 	
@@ -151,15 +194,16 @@ public class Main {
 					Element eElement = (Element) nNode;
 
 					int codigo = Integer.parseInt(eElement.getElementsByTagName("codigo").item(0).getTextContent());
-					String nombre = eElement.getElementsByTagName("nombre").item(0).getTextContent();
-					String foto = eElement.getElementsByTagName("foto").item(0).getTextContent();
-					String descripcion = eElement.getElementsByTagName("descripcion").item(0).getTextContent();
+					
 					float precio = ThreadLocalRandom.current().nextFloat(1, 500);
 					precio = Math.round(precio * 100f) / 100f;
 					int stock = ThreadLocalRandom.current().nextInt(1, 501);
-					
-					Planta planta = new Planta(codigo, nombre, foto, descripcion, precio, stock);
-					listaPlantas.add(planta);
+					if(stock == 0) {
+						//bajaPlantas();
+					}else {
+						Planta planta = new Planta(codigo, precio, stock);
+						listaPlantas.add(planta);
+					}
 				}
 			}
 
@@ -226,5 +270,86 @@ public class Main {
 		}else{
 			System.out.println("Archivo plantasBaja.xml cargado exitosamente en la carpeta Plantas/");
 		}
+	}
+	
+	
+	private static void iniciarSesion() {
+		Scanner sc = new Scanner(System.in);
+		mostrarEmpleados();
+		System.out.println("Introduce tu identificación:");
+		int id = sc.nextInt();
+		System.out.println("Introduce tu contraseña");
+		sc.nextLine();
+		String contraseña = sc.nextLine();
+		boolean encontrado = false;
+		for(Empleado e: ListaEmpleados) {
+			if(e.getIdentificacion() == id && e.getContraseña().equals(contraseña)) {
+				System.out.println("Bienvenido/a, " + e.getNombre());
+				encontrado = true;
+				if(e.getCargo() == CARGO.GESTOR) {
+					//menuGestor();
+				}else {
+					//menuVendedor();
+				}
+				break;
+			}
+		}
+		
+		if(!encontrado) {
+			System.out.println("No se ha encontrado ningún empleado con esa identificación y contraseña.");
+		}
+		sc.close();
+	}
+	
+	
+	public static void mostrarEmpleados() {
+		for(Empleado e: ListaEmpleados) {
+			System.out.println(e.toString());
+		}
+	}
+	
+	
+	public static void menuVendedor() {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("¿Que opcion quieres realizar?");
+		System.out.println("1- Visualizar el catálogo.");
+		System.out.println("2- Generar una venta.");
+		System.out.println("3- Buscar un ticket.");
+		System.out.println("4- Realizar una devolución.");
+		System.out.println("5- Salir.");
+		
+		int opcion = sc.nextInt();
+		switch(opcion) {
+			case 1:
+				//visualizarCatalogo();
+				break;
+			case 2:
+				//generarVenta();
+				break;
+			case 3:
+				//buscarTicket();
+				break;
+			case 4:
+				//hacerDevolucion();
+				break;
+			case 5:
+				System.out.println("Has decidido salir.");
+				break;
+			default:
+				System.out.println("No es una opción válida. Saliendo...");
+		}
+		
+	}
+	
+	
+	public static void menuGestor() {
+		
+	}
+	
+	
+	public static void visualizarCatalogo() {
+		File rutaPlantasDAT = new File("Plantas/plantas.dat");
+		File rutaPlantasXML = new File("Plantas/plantas.xml");
+		
 	}
 }

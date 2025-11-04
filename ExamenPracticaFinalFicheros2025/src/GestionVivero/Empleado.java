@@ -1,6 +1,9 @@
 package GestionVivero;
-	enum CARGO {VENDEDOR, GESTOR};
-public class Empleado {
+
+import java.io.Serializable;
+
+enum CARGO {VENDEDOR, GESTOR};
+public class Empleado implements Serializable{
 	private int identificacion;
 	private String nombre;
 	private String contraseña;
@@ -12,6 +15,12 @@ public class Empleado {
 		this.nombre = nombre;
 		this.contraseña = contraseña;
 		this.cargo = cargo;
+	}
+
+	public Empleado(int identificacion, String nombre) {
+		super();
+		this.identificacion = identificacion;
+		this.nombre = nombre;
 	}
 
 	public int getIdentificacion() {
@@ -48,7 +57,7 @@ public class Empleado {
 
 	@Override
 	public String toString() {
-		return "Empleado [identificacion=" + identificacion + ", nombre=" + nombre + ", contraseña=" + contraseña + ", cargo=" + cargo + "]";
+		return "Empleado [identificacion=" + identificacion + ", nombre=" + nombre + ", cargo=" + cargo + "]";
 	}
 	
 	

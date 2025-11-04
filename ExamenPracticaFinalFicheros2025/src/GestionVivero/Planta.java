@@ -10,14 +10,19 @@ public class Planta implements Serializable{
     private float precio;
     private int stock;
     
-	public Planta(int codigo, String nombre, String foto, String descripcion, float precio, int stock) {
+	public Planta(int codigo, float precio, int stock) {
+		super();
+		this.codigo = codigo;
+		this.precio = precio;
+		this.stock = stock;
+	}
+
+	public Planta(int codigo, String nombre, String foto, String descripcion) {
 		super();
 		this.codigo = codigo;
 		this.nombre = nombre;
 		this.foto = foto;
 		this.descripcion = descripcion;
-		this.precio = precio;
-		this.stock = stock;
 	}
 
 	public int getCodigo() {
