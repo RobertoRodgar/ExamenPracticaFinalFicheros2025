@@ -111,15 +111,13 @@ public class Main {
 		
 		ruta = "Plantas/plantas.dat";
 		rutaPlanta = new File(ruta);
-		if(!rutaPlanta.exists()) {
+		if(!rutaPlanta.exists() || rutaPlanta.length() <= 0) {
 			try {
 				rutaPlanta.createNewFile();
 				pasarXML_DAT();
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
-		}else if(rutaPlanta.exists() && rutaPlanta.length() <= 0) {
-			pasarXML_DAT();
 		}else {
 			System.out.println("El archivo plantas.dat se ha cargado exitosamente.");
 		}
@@ -147,12 +145,15 @@ public class Main {
 	
 	private static void darAltaPlantas() {
 		Scanner sc = new Scanner(System.in);
-		int cantidad = sc.nextInt();
+		int cantidad = leerEnteroSeguro(sc, "¿Cuántas plantas deseas dar de alta? ");
 		for (int i = 0; i < cantidad; i++) {
-			int codigo = sc.nextInt();
-			String nombre = sc.nextLine();
-			String foto = sc.nextLine();
-			String desc = sc.nextLine();
+			int codigo = leerEnteroSeguro(sc, "Código de la planta " + (i + 1) + ": ");
+		    System.out.print("Introduce el nombre: ");
+		    String nombre = sc.nextLine();
+		    System.out.print("Introduce la foto: ");
+		    String foto = sc.nextLine();
+		    System.out.print("Introduce una descripción: ");
+		    String desc = sc.nextLine();
 			File rutaPlantas = new File("Plantas/plantas.xml");
 			try (FileWriter escPlantas = new FileWriter(rutaPlantas)) {
 				escPlantas.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -276,8 +277,8 @@ public class Main {
 	private static void iniciarSesion() {
 		Scanner sc = new Scanner(System.in);
 		mostrarEmpleados();
-		System.out.println("Introduce tu identificación:");
-		int id = sc.nextInt();
+		
+		int id = leerEnteroSeguro(sc, "Introduce tu identificación: ");
 		System.out.println("Introduce tu contraseña");
 		sc.nextLine();
 		String contraseña = sc.nextLine();
@@ -311,14 +312,14 @@ public class Main {
 	
 	public static void menuVendedor() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("¿Que opcion quieres realizar?");
+		
 		System.out.println("1- Visualizar el catálogo.");
 		System.out.println("2- Generar una venta.");
 		System.out.println("3- Buscar un ticket.");
 		System.out.println("4- Realizar una devolución.");
 		System.out.println("5- Salir.");
 		
-		int opcion = sc.nextInt();
+		int opcion = leerEnteroSeguro(sc, "Selecciona una opción: ");
 		switch(opcion) {
 			case 1:
 				//visualizarCatalogo();
@@ -350,6 +351,96 @@ public class Main {
 	public static void visualizarCatalogo() {
 		File rutaPlantasDAT = new File("Plantas/plantas.dat");
 		File rutaPlantasXML = new File("Plantas/plantas.xml");
-		
+
+	    if (!rutaPlantasXML.exists() || !rutaPlantasDAT.exists()) {
+	        System.out.println("⚠️ No se encuentran los archivos necesarios (plantas.xml o plantas.dat).");
+	        return;
+	    }
+
+	    try {
+	        ArrayList<Planta> listaPlantasDAT = new ArrayList<>();
+	        try (FileInputStream fis = new FileInputStream(rutaPlantasDAT);
+	             ObjectInputStream ois = new ObjectInputStream(fis)) {
+	            listaPlantasDAT = (ArrayList<Planta>) ois.readObject();
+	        }
+
+	        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+	        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+	        Document doc = dBuilder.parse(rutaPlantasXML);
+	        doc.getDocumentElement().normalize();
+
+	        NodeList nList = doc.getElementsByTagName("planta");
+
+	        System.out.println("LISTADO DE PLANTAS DISPONIBLES");
+
+	        for (int i = 0; i < nList.getLength(); i++) {
+	            Node nNode = nList.item(i);
+
+	            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+	                Element eElement = (Element) nNode;
+
+	                int codigo = Integer.parseInt(eElement.getElementsByTagName("codigo").item(0).getTextContent());
+	                String nombre = eElement.getElementsByTagName("nombre").item(0).getTextContent();
+	                String foto = eElement.getElementsByTagName("foto").item(0).getTextContent();
+	                String descripcion = eElement.getElementsByTagName("descripcion").item(0).getTextContent();
+
+	                Planta plantaDat = null;
+	                for (Planta p : listaPlantasDAT) {
+	                    if (p.getCodigo() == codigo) {
+	                        plantaDat = p;
+	                        break;
+	                    }
+	                }
+
+	                if (plantaDat != null) {
+	                    System.out.println("Código: " + codigo);
+	                    System.out.println("Nombre: " + nombre);
+	                    System.out.println("Foto: " + foto);
+	                    System.out.println("Descripción: " + descripcion);
+	                    System.out.println("Precio: " + plantaDat.getPrecio() + " €");
+	                    System.out.println("Stock: " + plantaDat.getStock());
+	                    System.out.println("-------------------------------------");
+	                } else {
+	                    System.out.println("Planta con código " + codigo + " no tiene datos de precio/stock en el .dat");
+	                }
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        System.out.println("Error al visualizar las plantas:");
+	        e.printStackTrace();
+	    }
+	}
+	private static int leerEnteroSeguro(Scanner sc, String mensaje) {
+	    int numero;
+	    while (true) {
+	        System.out.println(mensaje);
+	        if (sc.hasNextInt()) {
+	            numero = sc.nextInt();
+	            sc.nextLine();
+	            break;
+	        } else {
+	            System.out.println("Error: por favor, introduce un número válido.");
+	            sc.nextLine();
+	        }
+	    }
+	    return numero;
+	}
+
+	
+	private static float leerFloatSeguro(Scanner sc, String mensaje) {
+	    float numero;
+	    while (true) {
+	        System.out.println(mensaje);
+	        if (sc.hasNextFloat()) {
+	            numero = sc.nextFloat();
+	            sc.nextLine();
+	            break;
+	        } else {
+	            System.out.println("Error: por favor, introduce un número decimal válido.");
+	            sc.nextLine();
+	        }
+	    }
+	    return numero;
 	}
 }
