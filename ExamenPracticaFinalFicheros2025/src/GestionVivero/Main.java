@@ -65,7 +65,7 @@ public class Main {
 				ObjectOutputStream escritura = new ObjectOutputStream(FicheroEscritura)) {
 
 			Empleado empleado1 = new Empleado(1452, "Teresa", "asb123", CARGO.VENDEDOR);
-			Empleado empleado2 = new Empleado(0234, "Miguel Angel", "123qwe", CARGO.VENDEDOR);
+			Empleado empleado2 = new Empleado(234, "Miguel Angel", "123qwe", CARGO.VENDEDOR);
 			Empleado empleado3 = new Empleado(7532, "Natalia", "xs21qw4", CARGO.GESTOR);
 
 			ListaEmpleados.add(empleado1);
@@ -353,7 +353,7 @@ public class Main {
 		File rutaPlantasXML = new File("Plantas/plantas.xml");
 
 	    if (!rutaPlantasXML.exists() || !rutaPlantasDAT.exists()) {
-	        System.out.println("⚠️ No se encuentran los archivos necesarios (plantas.xml o plantas.dat).");
+	        System.out.println("No se encuentran los archivos necesarios (plantas.xml o plantas.dat).");
 	        return;
 	    }
 
