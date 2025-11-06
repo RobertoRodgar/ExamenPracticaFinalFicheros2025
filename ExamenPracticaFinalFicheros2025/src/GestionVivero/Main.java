@@ -1,6 +1,7 @@
 package GestionVivero;
 
 import java.io.*;
+import java.nio.file.DirectoryIteratorException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
@@ -12,6 +13,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+
 
 
 public class Main {
@@ -280,7 +283,6 @@ public class Main {
 		
 		int id = leerEnteroSeguro(sc, "Introduce tu identificación: ");
 		System.out.println("Introduce tu contraseña");
-		sc.nextLine();
 		String contraseña = sc.nextLine();
 		boolean encontrado = false;
 		for(Empleado e: ListaEmpleados) {
@@ -290,7 +292,7 @@ public class Main {
 				if(e.getCargo() == CARGO.GESTOR) {
 					//menuGestor();
 				}else {
-					//menuVendedor();
+					menuVendedor(id);
 				}
 				break;
 			}
@@ -310,36 +312,38 @@ public class Main {
 	}
 	
 	
-	public static void menuVendedor() {
+	public static void menuVendedor(int id) {
 		Scanner sc = new Scanner(System.in);
 		
+		int opcion = 0;
+		do {
 		System.out.println("1- Visualizar el catálogo.");
 		System.out.println("2- Generar una venta.");
 		System.out.println("3- Buscar un ticket.");
 		System.out.println("4- Realizar una devolución.");
 		System.out.println("5- Salir.");
 		
-		int opcion = leerEnteroSeguro(sc, "Selecciona una opción: ");
-		switch(opcion) {
+			opcion = leerEnteroSeguro(sc, "Selecciona una opción: ");
+			switch (opcion) {
 			case 1:
-				//visualizarCatalogo();
+				visualizarCatalogo();
 				break;
 			case 2:
-				//generarVenta();
+				// generarVenta(id);
 				break;
 			case 3:
-				//buscarTicket();
+				// buscarTicket();
 				break;
 			case 4:
-				//hacerDevolucion();
+				// hacerDevolucion();
 				break;
 			case 5:
 				System.out.println("Has decidido salir.");
 				break;
 			default:
 				System.out.println("No es una opción válida. Saliendo...");
-		}
-		
+			}
+		} while (opcion != 5);
 	}
 	
 	
@@ -411,6 +415,38 @@ public class Main {
 	        e.printStackTrace();
 	    }
 	}
+	
+	
+	private static void generarVenta(int id) {
+		Empleado vendedor;
+		for(Empleado e : ListaEmpleados) {
+			if(e.getIdentificacion() == id) {
+				vendedor = e;
+				break;
+			}
+		}
+		
+	}
+	
+	
+	private static void crearTicket(int id) {
+		int numeroTicket;
+		String ticket = "Tickets/";
+		File rutaTickets = new File(ticket);
+		File rutaDevoluciones = new File("Devoluciones/");
+		numeroTicket = (rutaTickets.listFiles().length + rutaDevoluciones.listFiles().length) + 1;
+
+		ticket = "Tickets/" + numeroTicket + ".txt";
+		rutaTickets = new File(ticket);
+		
+		try {
+			rutaTickets.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	private static int leerEnteroSeguro(Scanner sc, String mensaje) {
 	    int numero;
 	    while (true) {
