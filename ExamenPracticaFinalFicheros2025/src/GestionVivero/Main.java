@@ -329,7 +329,7 @@ public class Main {
 				visualizarCatalogo();
 				break;
 			case 2:
-				// generarVenta(id);
+				generarVenta(id);
 				break;
 			case 3:
 				// buscarTicket();
@@ -418,18 +418,42 @@ public class Main {
 	
 	
 	private static void generarVenta(int id) {
-		Empleado vendedor;
+		Scanner sc = new Scanner(System.in);
+		Empleado vendedor = null;
 		for(Empleado e : ListaEmpleados) {
 			if(e.getIdentificacion() == id) {
 				vendedor = e;
 				break;
 			}
 		}
+		int numTicket =  crearTicket();
+		String rutaTicket = "Tickets/" + numTicket + ".txt";
+		File ticket = new File(rutaTicket);
+		try {
+			FileWriter fw = new FileWriter(ticket);
+			fw.write("Número Ticket: " + numTicket + "\n");
+			fw.write("——————————————//—————————————————————————————————\n");
+			fw.write("Empleado que ha atendido: " + id + "\n");
+			fw.write("Nombre del empleado: " + vendedor.getNombre() + "\n");
+			fw.write("CodigoProducto\t Cantidad\t PrecioUnitario");
+			fw.close();
+			/*while(true) {
+				int opcion = leerEnteroSeguro(sc,"¿Cuántas plantas quieres añadir?");
+				if(opcion > 0) {
+					
+				}else {
+					System.out.println("No es una opción válida. Saliendo...");
+					break;
+				}
+			}*/
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
 	
-	private static void crearTicket(int id) {
+	private static int crearTicket() {
 		int numeroTicket;
 		String ticket = "Tickets/";
 		File rutaTickets = new File(ticket);
@@ -444,6 +468,7 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return numeroTicket;
 	}
 	
 	
