@@ -388,8 +388,8 @@ public class Main {
 	    }
 	    
 	    
-	    ListaEmpleados.remove(empleado);
 	    ListaEmpleadosBaja.add(empleado);
+	    ListaEmpleados.remove(empleado);
 	    guardarEmpleados();
 	    guardarEmpleadosBaja();
 	    
@@ -447,7 +447,7 @@ public class Main {
 
 	    try {
 	        ArrayList<String> lineas = new ArrayList<>();
-	        if (rutaPlantaXML.exists()) {
+	        if (rutaPlantaXML.exists() && rutaPlantaXML.length() > 0) {
 	            try (BufferedReader br = new BufferedReader(new FileReader(rutaPlantaXML))) {
 	                String linea;
 	                while ((linea = br.readLine()) != null) {
@@ -460,8 +460,47 @@ public class Main {
 	        } else {
 	            lineas.add("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 	            lineas.add("<plantas>");
+	            try (BufferedReader br = new BufferedReader(new FileReader(rutaPlantaXML))) {
+	                String linea;
+	                while ((linea = br.readLine()) != null) {
+	                    lineas.add(linea);
+	                }
+	            }
 	        }
+	        File rutaPlantaXMLOG = new File("Plantas/plantas.xml");
+	        String nombre = null;
+	        String foto = null;
+	        String descripcion = null;
+	        try {
 
+		        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		        Document doc = dBuilder.parse(rutaPlantaXMLOG);
+		        doc.getDocumentElement().normalize();
+
+		        NodeList nList = doc.getElementsByTagName("planta");
+
+		        System.out.println("LISTADO DE PLANTAS DISPONIBLES");
+
+		        for (int i = 0; i < nList.getLength(); i++) {
+		            Node nNode = nList.item(i);
+
+		            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+		                Element eElement = (Element) nNode;
+
+		                
+		                if(Integer.parseInt(eElement.getElementsByTagName("codigo").item(0).getTextContent()) == codigoBuscar) {
+		                	nombre = eElement.getElementsByTagName("nombre").item(0).getTextContent();
+		                	foto = eElement.getElementsByTagName("foto").item(0).getTextContent();
+		                	descripcion = eElement.getElementsByTagName("descripcion").item(0).getTextContent();
+		                	
+		                }
+		            }
+		        }
+		            }catch(Exception e) {
+		            	e.printStackTrace();
+		            }
+	        
 	        try (FileWriter fw = new FileWriter(rutaPlantaXML)) {
 	            for (String linea : lineas) {
 	                fw.write(linea + "\n");
@@ -469,9 +508,9 @@ public class Main {
 
 	            fw.write("	<planta>\n");
 	            fw.write("		<codigo>" + planta.getCodigo() + "</codigo>\n");
-	            fw.write("		<nombre>" + planta.getNombre() + "</nombre>\n"); 
-	            fw.write("		<foto>" + planta.getFoto() + "</foto>\n");
-	            fw.write("		<descripcion>" + planta.getDescripcion() + "</descripcion>\n");
+	            fw.write("		<nombre>" + nombre + "</nombre>\n"); 
+	            fw.write("		<foto>" + foto + "</foto>\n");
+	            fw.write("		<descripcion>" + descripcion + "</descripcion>\n");
 	            fw.write("	</planta>\n");
 	            fw.write("</plantas>");
 	        }      
